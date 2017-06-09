@@ -52,7 +52,7 @@ i = 0
 l = len(list(open(dataFileDict[file2read]["path"])))
 print(l)
 # Initial call to print 0% progress
-courseraLib.printProgressBar(i, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
+courseraLib.printProgressBar(i, l, prefix = 'Loading Corpus:', suffix = 'Complete', length = 20)
 for line in fileObj:
 	EoSentence="[.,;!?]+"
 	line=re.sub(EoSentence,"\n",line) 
@@ -64,12 +64,12 @@ for line in fileObj:
 		else:
 			continue
 	i+= 1
-	courseraLib.printProgressBar(i, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
+	courseraLib.printProgressBar(i, l, prefix = 'Loading Corpus:', suffix = 'Complete', length = 20)
 
 #test
-ngramDictObj=courseraLib.ExtractCorpus(Corpus,3)
+ngramDictObj=courseraLib.ExtractCorpus(Corpus,4)
 # logging.debug(ngramDictObj)
-logging.debug(ngramDictObj["the"]["cat"])
+logging.debug(ngramDictObj["she"]["would"])
 print(len(ngramDictObj),"items")
 #close file objs after use
 fileObj.close()
