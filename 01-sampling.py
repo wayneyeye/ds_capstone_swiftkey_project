@@ -40,6 +40,6 @@ for line in fileObj:
 	i+=1
 	if i>=1000:
 		break
-
+#close file objects after usage
 fileObj.close()
 saveObj.close()
