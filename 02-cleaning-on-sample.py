@@ -19,6 +19,7 @@ def cleanInput(input):
 	for item in input:
 		logging.debug(item)
 		item = item.strip(string.punctuation)
+		item = re.sub(r"^.*\d+.*$","<Quantity>",item)
 		if len(item)>1 or (item=='a' or item=='i'):
 			cleanInput.append(item)
 	return cleanInput
@@ -47,10 +48,20 @@ for line in fileObj:
 	logging.info("------------------------Orginial Text--------------------------")
 	logging.info("\n"+line)
 	logging.info("------------------------Processing--------------------------")
-	logging.info(cleanInput(line))
+	# split at end of sentences
+	EoSentence="[.,;!?]+"
+	line=re.sub(EoSentence,"\n",line) 
+	line=line.split("\n")
+	logging.debug(line)
+	for s in line:
+		if s!='':
+			logging.info(cleanInput(s))
+		else:
+			continue
 	logging.info("********************End of Processing*******************\n")
 
-
+#test
+logging.debug(string.punctuation)
 
 #close file objs after use
 fileObj.close()
