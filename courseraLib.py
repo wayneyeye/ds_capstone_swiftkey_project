@@ -1,4 +1,4 @@
-import sys,os,logging,re,pprint,string
+import sys,os,logging,re,pprint,string,datetime
 def cleanInput(input):
 	input=re.sub('\n+'," ",input).lower()
 	input=bytes(input,"UTF-8")
@@ -40,13 +40,13 @@ def prepareCorpus(path):
 def ngramDict(ngramDictObj,token):
 	word=token[0]
 	if word not in ngramDictObj:
-		ngramDictObj[word]={"_count":1}
+		ngramDictObj[word]={"_count":1,"_nextWord":{}}
 	else:
 		ngramDictObj[word]["_count"]+=1
 	if len(token)<=1:
 		return 
 	else:
-		subDict=ngramDictObj[word]
+		subDict=ngramDictObj[word]["_nextWord"]
 		ngramDict(subDict,token[1:])
 
 def ngramExtract(tokens,n,ngramDictObj):
@@ -81,21 +81,42 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
         print("\n")
 
 def ExtractCorpus(Corpus,n):
-	ngramDictObj={}
+	ngramDictObj={'_createDate':str(datetime.datetime.now()),'_nextWord':{}}
 	i=0
 	l=len(Corpus)
 	printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
 	for tokens in Corpus:
-		ngramExtract(tokens,n,ngramDictObj)
+		ngramExtract(tokens,n,ngramDictObj['_nextWord'])
 		i+= 1
 		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
 	print(len(ngramDictObj),"items loaded")
 	return ngramDictObj
 
+def rankingDict(ngramDictObj,print=True):
+	if ngramDictObj['_nextWord']!={}:
+		ngramDictObj['_freqDict']={}
+		# progress bar
+		if print:
+			i=0
+			l=len(ngramDictObj['_nextWord'])
+			printProgressBar(i, l, prefix = 'Ranking Dict:', suffix = 'Complete')
+		for w in ngramDictObj['_nextWord']:
+			ngramDictObj['_freqDict'][w]=ngramDictObj['_nextWord'][w]['_count']
+			ngramDictObj['_nextRanking']=sorted(ngramDictObj['_freqDict'],\
+				key=ngramDictObj['_freqDict'].__getitem__,reverse=True)
+			rankingDict(ngramDictObj['_nextWord'][w],print=False)
+			if print:
+				i+= 1
+				printProgressBar(i, l, prefix = 'Ranking Dict:', suffix = 'Complete')
+	else:
+		return
 
 def test():
-	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/twitter-sample.txt')
+	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/blogs-sample.txt')
 	ngramDictObj=ExtractCorpus(Corpus,3)
+	rankingDict(ngramDictObj)
+	pprint.pprint(ngramDictObj)
 	return	
+
 if __name__=="__main__":
 	test()
