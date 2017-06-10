@@ -16,9 +16,9 @@ dataFileDict={}
 
 # choose which file to read
 for file in os.listdir(dataFilePath):
-	logging.info(file)
+	logging.debug(file)
 	logging.debug(type(file))
-	logging.info(str(os.path.getsize(os.path.join(dataFilePath,file))/1024/1024)+' MB')
+	logging.debug(str(os.path.getsize(os.path.join(dataFilePath,file))/1024/1024)+' MB')
 	fileName=file.split("-")
 	dataFileDict[fileName[0]]=\
 	{
@@ -37,4 +37,4 @@ Corpus=courseraLib.prepareCorpus(dataFileDict[file2read]["path"])
 ngramDictObj=courseraLib.ExtractCorpus(Corpus,4)
 
 # logging.debug(ngramDictObj)
-print(len(ngramDictObj),"items loaded")
+logging.debug(ngramDictObj)

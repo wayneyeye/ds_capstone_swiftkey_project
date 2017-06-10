@@ -89,13 +89,13 @@ def ExtractCorpus(Corpus,n):
 		ngramExtract(tokens,n,ngramDictObj)
 		i+= 1
 		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
+	print(len(ngramDictObj),"items loaded")
 	return ngramDictObj
 
+
 def test():
-	sampleTokens=["apple","<quantity>","banana","i","wonder","why","such","a","big","cake","such","a","wonderful",]
-	sampleCorpus=[sampleTokens,[]]
-	ngramDictObj=ExtractCorpus(sampleCorpus,3)
-	pprint.pprint(ngramDictObj)
-	
+	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/twitter-sample.txt')
+	ngramDictObj=ExtractCorpus(Corpus,3)
+	return	
 if __name__=="__main__":
 	test()
