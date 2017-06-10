@@ -89,7 +89,7 @@ def ExtractCorpus(Corpus,n):
 		ngramExtract(tokens,n,ngramDictObj['_nextWord'])
 		i+= 1
 		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
-	ngramDictObj['_size']=len(ngramDictObj['_nextWord'])
+	ngramDictObj['_count']=len(ngramDictObj['_nextWord'])
 	return ngramDictObj
 
 def rankingDict(ngramDictObj,print=True,max=20):
@@ -100,22 +100,43 @@ def rankingDict(ngramDictObj,print=True,max=20):
 			i=0
 			l=len(ngramDictObj['_nextWord'])
 			printProgressBar(i, l, prefix = 'Ranking Dict:', suffix = 'Complete')
+
 		for w in ngramDictObj['_nextWord']:
 			ngramDictObj['_freqDict'][w]=ngramDictObj['_nextWord'][w]['_count']
-			rankingDict(ngramDictObj['_nextWord'][w],print=False)
+			rankingDict(ngramDictObj['_nextWord'][w],print=False)			
 			if print:
 				i+= 1
 				printProgressBar(i, l, prefix = 'Ranking Dict:', suffix = 'Complete')
-		ngramDictObj['_nextRanking']=sorted(ngramDictObj['_freqDict'],\
-		 	key=ngramDictObj['_freqDict'].__getitem__,reverse=True)
+		if ngramDictObj['_count']>5:
+			ngramDictObj['_nextRanking']=sorted(ngramDictObj['_freqDict'],\
+			 	key=ngramDictObj['_freqDict'].__getitem__,reverse=True)
+		else:
+			ngramDictObj['_nextRanking']=list(ngramDictObj['_freqDict'].keys())
+		# delete _freqDict
+		del ngramDictObj['_freqDict']
 	else:
 		return
 
+def naivePredict(ngramDictObj,previous):
+	previous_list=previous.lower().split(' ')
+	print(previous_list)
+	try:
+		print(ngramDictObj['_nextWord'][previous_list[0]]['_nextWord'][previous_list[1]]\
+			['_nextWord'][previous_list[2]]['_nextWord'][previous_list[3]]['_nextRanking'])
+	except:
+		print("Not Exists!")
+	return
+
 def test():
-	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/twitter-sample.txt')
-	ngramDictObj=ExtractCorpus(Corpus,3)
+	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/blogs-sample.txt')
+	ngramDictObj=ExtractCorpus(Corpus,4)
 	rankingDict(ngramDictObj)
-	pprint.pprint(ngramDictObj['_size'])
+	# pprint.pprint(ngramDictObj)
+	while True:
+		previous=input("input something to predict (type quit to exit):\n")
+		naivePredict(ngramDictObj,previous)
+		if previous=="quit":
+			sys.exit()
 	return	
 
 if __name__=="__main__":
