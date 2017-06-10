@@ -1,5 +1,5 @@
-import sys,os,logging,re,pprint,string,courseraLib
-#Logging header
+import logging,sys,os,pprint,courseraLib
+# Logging header
 LOGGING_LVL={
 	"debug":logging.DEBUG,
 	"info":logging.INFO,
@@ -13,7 +13,7 @@ logging.basicConfig(level=LOGGING_LVL.get(sys.argv[1],'debug'),format='%(asctime
 logging.debug(os.getcwd())
 dataFilePath=os.path.join(os.getcwd(),'sample-data')
 dataFileDict={}
-#choose which file to read
+# choose which file to read
 for file in os.listdir(dataFilePath):
 	logging.info(file)
 	logging.debug(type(file))
@@ -24,12 +24,12 @@ for file in os.listdir(dataFilePath):
 	"path":os.path.join(dataFilePath,file),
 	"size":os.path.getsize(os.path.join(dataFilePath,file))
 	}
-logging.debug(dataFileDict)
+pprint.pprint(dataFileDict)
 
 # open desired text file
 file2read=input("which file to read?\n"+" ".join(dataFileDict.keys())+"\n")
 
-#save to corpus
+# save to corpus
 Corpus=courseraLib.prepareCorpus(dataFileDict[file2read]["path"])
 
 # generate dict obj

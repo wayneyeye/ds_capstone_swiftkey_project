@@ -78,7 +78,7 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = '\r')
     # Print New Line on Complete
     if iteration == total: 
-        print()
+        print("\n")
 
 def ExtractCorpus(Corpus,n):
 	ngramDictObj={}
@@ -90,7 +90,6 @@ def ExtractCorpus(Corpus,n):
 		i+= 1
 		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
 	return ngramDictObj
-
 
 def test():
 	sampleTokens=["apple","<quantity>","banana","i","wonder","why","such","a","big","cake","such","a","wonderful",]
