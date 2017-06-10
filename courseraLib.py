@@ -89,10 +89,10 @@ def ExtractCorpus(Corpus,n):
 		ngramExtract(tokens,n,ngramDictObj['_nextWord'])
 		i+= 1
 		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
-	print(len(ngramDictObj),"items loaded")
+	print(len(ngramDictObj['_nextWord']),"items loaded")
 	return ngramDictObj
 
-def rankingDict(ngramDictObj,print=True):
+def rankingDict(ngramDictObj,print=True,max=20):
 	if ngramDictObj['_nextWord']!={}:
 		ngramDictObj['_freqDict']={}
 		# progress bar
@@ -102,12 +102,12 @@ def rankingDict(ngramDictObj,print=True):
 			printProgressBar(i, l, prefix = 'Ranking Dict:', suffix = 'Complete')
 		for w in ngramDictObj['_nextWord']:
 			ngramDictObj['_freqDict'][w]=ngramDictObj['_nextWord'][w]['_count']
-			ngramDictObj['_nextRanking']=sorted(ngramDictObj['_freqDict'],\
-				key=ngramDictObj['_freqDict'].__getitem__,reverse=True)
 			rankingDict(ngramDictObj['_nextWord'][w],print=False)
 			if print:
 				i+= 1
 				printProgressBar(i, l, prefix = 'Ranking Dict:', suffix = 'Complete')
+		ngramDictObj['_nextRanking']=sorted(ngramDictObj['_freqDict'],\
+		 	key=ngramDictObj['_freqDict'].__getitem__,reverse=True)
 	else:
 		return
 
@@ -115,7 +115,7 @@ def test():
 	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/blogs-sample.txt')
 	ngramDictObj=ExtractCorpus(Corpus,3)
 	rankingDict(ngramDictObj)
-	pprint.pprint(ngramDictObj)
+	pprint.pprint(ngramDictObj['_nextWord']['cat'])
 	return	
 
 if __name__=="__main__":
