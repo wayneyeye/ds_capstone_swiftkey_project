@@ -13,6 +13,7 @@ logging.basicConfig(level=LOGGING_LVL.get(sys.argv[1],'debug'),format='%(asctime
 logging.debug(os.getcwd())
 dataFilePath=os.path.join(os.getcwd(),'sample-data')
 dataFileDict={}
+
 # choose which file to read
 for file in os.listdir(dataFilePath):
 	logging.info(file)
