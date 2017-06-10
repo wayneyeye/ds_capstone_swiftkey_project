@@ -1,4 +1,4 @@
-import sys,os,logging,re,pprint,string,datetime
+import sys,os,logging,re,pprint,string,datetime,gc,json
 def cleanInput(input):
 	input=re.sub('\n+'," ",input).lower()
 	input=bytes(input,"UTF-8")
@@ -17,9 +17,9 @@ def cleanInput(input):
 def prepareCorpus(path):
 	fileObj=open(path)
 	Corpus=[]
+	# Initial call to print 0% progress
 	i = 0
 	l = len(list(open(path)))
-	# Initial call to print 0% progress
 	printProgressBar(i, l, prefix = 'Loading Corpus:', suffix = 'Complete')
 	for line in fileObj:
 		EoSentence="[.,;!?]+"
@@ -39,14 +39,13 @@ def prepareCorpus(path):
 
 def ngramDict(ngramDictObj,token):
 	word=token[0]
-	if word not in ngramDictObj:
-		ngramDictObj[word]={"_c":1,"_n":{}}
-	else:
-		ngramDictObj[word]["_c"]+=1
+	ngramDictObj['_c']+=1
+	if word not in ngramDictObj['_n']:
+		ngramDictObj['_n'][word]={"_c":0,"_n":{}}
 	if len(token)<=1:
 		return 
 	else:
-		subDict=ngramDictObj[word]["_n"]
+		subDict=ngramDictObj['_n'][word]
 		ngramDict(subDict,token[1:])
 
 def ngramExtract(tokens,n,ngramDictObj):
@@ -81,18 +80,21 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
         print("\n")
 
 def ExtractCorpus(Corpus,n):
-	ngramDictObj={'_createDate':str(datetime.datetime.now()),'_n':{}}
+	# create new Dict for storage
+	ngramDictObj={'_createDate':str(datetime.datetime.now()),'_n':{},'_c':0}
+	#progress bar print
 	i=0
 	l=len(Corpus)
 	printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
+	#iterate thru corpus
 	for tokens in Corpus:
-		ngramExtract(tokens,n,ngramDictObj['_n'])
+		ngramExtract(tokens,n,ngramDictObj)
 		i+= 1
 		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
-	ngramDictObj['_c']=len(ngramDictObj['_n'])
 	return ngramDictObj
 
-def rankingDict(ngramDictObj,print=True,max=10):
+def rankingDict(ngramDictObj,print=True,max=10,parent_ct=100):
+	# if not a leaf node
 	if ngramDictObj['_n']!={}:
 		ngramDictObj['_f']={}
 		# progress bar
@@ -100,27 +102,46 @@ def rankingDict(ngramDictObj,print=True,max=10):
 			i=0
 			l=len(ngramDictObj['_n'])
 			printProgressBar(i, l, prefix = 'Ranking Dict:', suffix = 'Complete')
-
+		# add to freqDict
+		leafChildOnlyFlag=True
 		for w in ngramDictObj['_n']:
+			#fix leaf node count
+			if ngramDictObj['_n'][w]['_n']=={}:
+				ngramDictObj['_n'][w]['_c']=1
+			else:
+				leafChildOnlyFlag=False
+			# load freqDict
 			ngramDictObj['_f'][w]=ngramDictObj['_n'][w]['_c']
-			rankingDict(ngramDictObj['_n'][w],print=False)			
+			ngramDictObj['_n'][w]['_p']=ngramDictObj['_n'][w]['_c']/parent_ct
+			# recursively call to the next level
+			rankingDict(ngramDictObj['_n'][w],print=False,parent_ct=ngramDictObj['_n'][w]['_c'])			
 			if print:
 				i+= 1
 				printProgressBar(i, l, prefix = 'Ranking Dict:', suffix = 'Complete')
-		if ngramDictObj['_c']>5:
+		# if the current node has more than 5 branches--->cache the most frequent child		
+		if len(ngramDictObj['_f'])>5:
 			ngramDictObj['_r']=sorted(ngramDictObj['_f'],\
 			 	key=ngramDictObj['_f'].__getitem__,reverse=True)
 		else:
 			ngramDictObj['_r']=list(ngramDictObj['_f'].keys())
 		# shrink _r
-		if len(ngramDictObj['_r'])<max:
-			ngramDictObj['_r']=ngramDictObj['_r'][0:len(ngramDictObj['_r'])]
-		else:
+		if len(ngramDictObj['_r'])>max:
 			ngramDictObj['_r']=ngramDictObj['_r'][0:max]
-		# delete _f
+		# delete _f _c
 		del ngramDictObj['_f']
+		del ngramDictObj['_c']
+		if leafChildOnlyFlag:
+			for k in ngramDictObj['_n']:
+				if k not in ngramDictObj['_r']:
+					del ngramDictObj['_n'][k]
+	# if a leaf node
 	else:
-		return
+		# free leafnode space
+		del ngramDictObj['_n']
+		del ngramDictObj['_c']
+		# del ngramDictObj['_p']
+		
+
 
 def naivePredict(ngramDictObj,previous):
 	previous_list=previous.lower().split(' ')
@@ -133,16 +154,31 @@ def naivePredict(ngramDictObj,previous):
 	return
 
 def test():
-	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/twitter-sample.txt')
-	ngramDictObj=ExtractCorpus(Corpus,3)
-	rankingDict(ngramDictObj)
-	pprint.pprint(ngramDictObj)
-	while True:
-		previous=input("input something to predict (type quit to exit):\n")
-		naivePredict(ngramDictObj,previous)
-		if previous=="quit":
-			sys.exit()
+	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/news-sample.txt')
+	ngramDictObj=ExtractCorpus(Corpus,4)
+	rankingDict(ngramDictObj,parent_ct=ngramDictObj['_c'])
+	# print(sys.getsizeof(ngramDictObj))
+	gc.collect()
+	f=open('py-output.txt',"w")
+	# pprint.pprint(ngramDictObj)
+	json.dump(ngramDictObj,f)
+
+	f.close
+	# while True:
+	# 	previous=input("input something to predict (type quit to exit):\n")
+	# 	naivePredict(ngramDictObj,previous)
+	# 	if previous=="quit":
+	# 		sys.exit()
 	return	
 
 if __name__=="__main__":
+	LOGGING_LVL={
+	"debug":logging.DEBUG,
+	"info":logging.INFO,
+	"warning":logging.WARNING,
+	"error":logging.ERROR,
+	"critical":logging.CRITICAL,
+}
+	logging.basicConfig(level=LOGGING_LVL.get(sys.argv[1],'debug'),format='%(asctime)s-%(levelname)s-%(message)s')
+
 	test()

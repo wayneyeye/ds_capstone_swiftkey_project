@@ -38,7 +38,7 @@ i=1
 for line in fileObj:
 	saveObj.write(line)
 	i+=1
-	if i>=100000:
+	if i>=30:
 		break
 #close file objects after usage
 fileObj.close()
