@@ -1,4 +1,42 @@
-import pprint
+import sys,os,logging,re,pprint,string
+def cleanInput(input):
+	input=re.sub('\n+'," ",input).lower()
+	input=bytes(input,"UTF-8")
+	input=input.decode("ascii","ignore")
+	input=input.split(' ')
+	#strip single letter word other than i and a
+	cleanInput=[]
+	for item in input:
+		# logging.debug(item)
+		item = item.strip(string.punctuation)
+		item = re.sub(r"^.*\d+.*$","<Quantity>",item)
+		if len(item)>1 or (item=='a' or item=='i'):
+			cleanInput.append(item)
+	return cleanInput
+
+def prepareCorpus(path):
+	fileObj=open(path)
+	Corpus=[]
+	i = 0
+	l = len(list(open(path)))
+	# Initial call to print 0% progress
+	printProgressBar(i, l, prefix = 'Loading Corpus:', suffix = 'Complete')
+	for line in fileObj:
+		EoSentence="[.,;!?]+"
+		line=re.sub(EoSentence,"\n",line) 
+		line=line.split("\n")
+		for s in line:
+			if s!='':
+				xS=cleanInput(s)
+				Corpus.append(xS)
+			else:
+				continue
+		i+= 1
+		printProgressBar(i, l, prefix = 'Loading Corpus:', suffix = 'Complete')
+	#close file objs after use
+	fileObj.close()
+	return Corpus
+
 def ngramDict(ngramDictObj,token):
 	word=token[0]
 	if word not in ngramDictObj:
@@ -22,7 +60,7 @@ def ngramExtract(tokens,n,ngramDictObj):
 		ngramDict(ngramDictObj,tokens[0:n])
 		ngramExtract(tokens[1:],n,ngramDictObj)
 
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█'):
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 30, fill = '█'):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -46,14 +84,13 @@ def ExtractCorpus(Corpus,n):
 	ngramDictObj={}
 	i=0
 	l=len(Corpus)
-	printProgressBar(i, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
+	printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
 	for tokens in Corpus:
 		ngramExtract(tokens,n,ngramDictObj)
 		i+= 1
-		printProgressBar(i, l, prefix = 'Progress:', suffix = 'Complete', length = 50)
+		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
 	return ngramDictObj
 
-# Print iterations progress
 
 def test():
 	sampleTokens=["apple","<quantity>","banana","i","wonder","why","such","a","big","cake","such","a","wonderful",]
