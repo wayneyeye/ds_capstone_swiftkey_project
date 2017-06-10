@@ -89,7 +89,7 @@ def ExtractCorpus(Corpus,n):
 		ngramExtract(tokens,n,ngramDictObj['_nextWord'])
 		i+= 1
 		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
-	print(len(ngramDictObj['_nextWord']),"items loaded")
+	ngramDictObj['_size']=len(ngramDictObj['_nextWord'])
 	return ngramDictObj
 
 def rankingDict(ngramDictObj,print=True,max=20):
@@ -112,10 +112,10 @@ def rankingDict(ngramDictObj,print=True,max=20):
 		return
 
 def test():
-	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/blogs-sample.txt')
+	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/twitter-sample.txt')
 	ngramDictObj=ExtractCorpus(Corpus,3)
 	rankingDict(ngramDictObj)
-	pprint.pprint(ngramDictObj['_nextWord']['cat'])
+	pprint.pprint(ngramDictObj['_size'])
 	return	
 
 if __name__=="__main__":
