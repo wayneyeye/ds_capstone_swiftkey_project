@@ -131,9 +131,12 @@ def rankingDict(ngramDictObj,print=True,max=10,parent_ct=100):
 		del ngramDictObj['_f']
 		del ngramDictObj['_c']
 		if leafChildOnlyFlag:
-			for k in ngramDictObj['_n']:
+			remove=[];
+			for k in ngramDictObj['_n'].keys():
 				if k not in ngramDictObj['_r']:
-					del ngramDictObj['_n'][k]
+					remove.append(k)
+			for k in remove:
+				del ngramDictObj['_n'][k]
 	# if a leaf node
 	else:
 		# free leafnode space
@@ -159,10 +162,9 @@ def test():
 	rankingDict(ngramDictObj,parent_ct=ngramDictObj['_c'])
 	# print(sys.getsizeof(ngramDictObj))
 	gc.collect()
-	f=open('py-output.txt',"w")
+	f=open('ignoredFiles/py-output.json',"w")
 	# pprint.pprint(ngramDictObj)
 	json.dump(ngramDictObj,f)
-
 	f.close
 	# while True:
 	# 	previous=input("input something to predict (type quit to exit):\n")
