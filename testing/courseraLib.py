@@ -157,15 +157,14 @@ def naivePredict(ngramDictObj,previous):
 	return
 
 def test():
-	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/news-sample.txt')
+	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/sentences-sample.txt')
 	ngramDictObj=ExtractCorpus(Corpus,4)
 	rankingDict(ngramDictObj,parent_ct=ngramDictObj['_c'])
 	# print(sys.getsizeof(ngramDictObj))
-	gc.collect()
-	f=open('ignoredFiles/py-output.json',"w")
-	# pprint.pprint(ngramDictObj)
-	json.dump(ngramDictObj,f)
-	f.close
+	# f=open('ignoredFiles/sample-output.json',"w")
+	pprint.pprint(ngramDictObj)
+	# json.dump(ngramDictObj,f)
+	# f.close
 	# while True:
 	# 	previous=input("input something to predict (type quit to exit):\n")
 	# 	naivePredict(ngramDictObj,previous)
