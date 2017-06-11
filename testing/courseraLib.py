@@ -123,7 +123,13 @@ def rankingDict(ngramDictObj,print=True,max=10,parent_ct=100):
 				leafChildOnlyFlag=False
 			# load freqDict
 			ngramDictObj['_f'][w]=ngramDictObj['_n'][w]['_c']
-			ngramDictObj['_n'][w]['_p']=ngramDictObj['_n'][w]['_c']/parent_ct
+			prob=ngramDictObj['_n'][w]['_c']/parent_ct
+			if prob<0.0001:
+				ngramDictObj['_n'][w]['_p']=format(ngramDictObj['_n'][w]['_c']/parent_ct,'.8f')
+			elif prob < 0.1:
+				ngramDictObj['_n'][w]['_p']=format(ngramDictObj['_n'][w]['_c']/parent_ct,'.3f')
+			else:
+				ngramDictObj['_n'][w]['_p']=format(ngramDictObj['_n'][w]['_c']/parent_ct,'.0f')
 			# recursively call to the next level
 			rankingDict(ngramDictObj['_n'][w],print=False,parent_ct=ngramDictObj['_n'][w]['_c'])			
 			if print:
