@@ -37,27 +37,36 @@ def prepareCorpus(path):
 	fileObj.close()
 	return Corpus
 
-def ngramDict(ngramDictObj,token):
+def ngramDict(ngramDictObj,word2id,id2word,token):
 	word=token[0]
 	ngramDictObj['_c']+=1
-	if word not in ngramDictObj['_n']:
-		ngramDictObj['_n'][word]={"_c":0,"_n":{}}
+	# add new word to dictionary
+	if word not in word2id['_word']:
+		word2id['_counter']+=1
+		wid=word2id['_counter']
+		word2id['_word'][word]=wid
+		id2word['_id'][wid]=word
+	else:
+		wid=word2id['_word'][word]
+	# add id to ngramDict
+	if wid not in ngramDictObj['_n']:
+		ngramDictObj['_n'][wid]={"_c":0,"_n":{}}
 	if len(token)<=1:
 		return 
 	else:
-		subDict=ngramDictObj['_n'][word]
-		ngramDict(subDict,token[1:])
+		subDict=ngramDictObj['_n'][wid]
+		ngramDict(subDict,word2id,id2word,token[1:])
 
-def ngramExtract(tokens,n,ngramDictObj):
+def ngramExtract(tokens,n,ngramDictObj,word2id,id2word):
 	if len(tokens)==0:
 		return
 	if len(tokens)<n:
-		ngramDict(ngramDictObj,tokens)
+		ngramDict(ngramDictObj,word2id,id2word,tokens)
 		if len(tokens)>1:
-			ngramExtract(tokens[1:],n,ngramDictObj)
+			ngramExtract(tokens[1:],n,ngramDictObj,word2id,id2word)
 	else:
-		ngramDict(ngramDictObj,tokens[0:n])
-		ngramExtract(tokens[1:],n,ngramDictObj)
+		ngramDict(ngramDictObj,word2id,id2word,tokens[0:n])
+		ngramExtract(tokens[1:],n,ngramDictObj,word2id,id2word)
 
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 30, fill = '█'):
     """
@@ -82,16 +91,18 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
 def ExtractCorpus(Corpus,n):
 	# create new Dict for storage
 	ngramDictObj={'_createDate':str(datetime.datetime.now()),'_n':{},'_c':0}
+	word2id={'_createDate':str(datetime.datetime.now()),'_word':{},'_counter':0}
+	id2word={'_createDate':str(datetime.datetime.now()),'_id':{}}
 	#progress bar print
 	i=0
 	l=len(Corpus)
 	printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
 	#iterate thru corpus
 	for tokens in Corpus:
-		ngramExtract(tokens,n,ngramDictObj)
+		ngramExtract(tokens,n,ngramDictObj,word2id,id2word)
 		i+= 1
 		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
-	return ngramDictObj
+	return (ngramDictObj,word2id,id2word)
 
 def rankingDict(ngramDictObj,print=True,max=10,parent_ct=100):
 	# if not a leaf node
@@ -157,14 +168,26 @@ def naivePredict(ngramDictObj,previous):
 	return
 
 def test():
-	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/sentences-sample.txt')
-	ngramDictObj=ExtractCorpus(Corpus,4)
+	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/testing-data/twitter-testing.txt')
+	ngramDictObj,word2id,id2word=ExtractCorpus(Corpus,4)
 	rankingDict(ngramDictObj,parent_ct=ngramDictObj['_c'])
 	# print(sys.getsizeof(ngramDictObj))
-	# f=open('ignoredFiles/sample-output.json',"w")
-	pprint.pprint(ngramDictObj)
-	# json.dump(ngramDictObj,f)
-	# f.close
+	if word2id['_counter']<=100:
+		pprint.pprint(ngramDictObj)
+		pprint.pprint(word2id)
+		pprint.pprint(id2word)
+	else:
+		f1=open('ignoredFiles/sample-ngramDict.json',"w")
+		json.dump(ngramDictObj,f1)
+		f1.close
+
+		f2=open('ignoredFiles/sample-Word2id.json',"w")
+		json.dump(word2id,f2)
+		f2.close
+
+		f3=open('ignoredFiles/sample-Id2word.json',"w")
+		json.dump(id2word,f3)
+		f3.close
 	# while True:
 	# 	previous=input("input something to predict (type quit to exit):\n")
 	# 	naivePredict(ngramDictObj,previous)
