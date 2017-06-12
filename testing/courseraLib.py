@@ -103,9 +103,9 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
 
 def ExtractCorpus(Corpus,n):
 	# create new Dict for storage
-	ngramDictObj={'_createDate':str(datetime.datetime.now()),'_n':{},'_c':0}
-	word2id={'_createDate':str(datetime.datetime.now()),'_word':{},'_counter':0}
-	id2word={'_createDate':str(datetime.datetime.now()),'_id':{}}
+	ngramDictObj={'_createDate':str(datetime.datetime.now()),"_model":n,'_n':{},'_c':0}
+	word2id={'_word':{},'_counter':0}
+	id2word={'_id':{}}
 	#progress bar print
 	i=0
 	l=len(Corpus)
@@ -118,7 +118,9 @@ def ExtractCorpus(Corpus,n):
 	
 	if "<EOS>" in word2id["_word"]:
 		del ngramDictObj["_n"][word2id["_word"]["<EOS>"]]
-	return (ngramDictObj,word2id,id2word)
+	ngramDictObj["_word2id"]=word2id
+	ngramDictObj["_id2word"]=id2word
+	return ngramDictObj
 
 def rankingDict(ngramDictObj,print=True,max=5,parent_ct=100):
 	# if not a leaf node
@@ -164,9 +166,6 @@ def rankingDict(ngramDictObj,print=True,max=5,parent_ct=100):
 		# free leafnode space
 		del ngramDictObj['_n']
 
-		
-
-
 def naivePredict(ngramDictObj,previous):
 	previous_list=previous.lower().split(' ')
 	print(previous_list)
@@ -179,25 +178,15 @@ def naivePredict(ngramDictObj,previous):
 
 def test():
 	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/sentences-sample.txt')
-	ngramDictObj,word2id,id2word=ExtractCorpus(Corpus,3)
+	ngramDictObj=ExtractCorpus(Corpus,3)
 	rankingDict(ngramDictObj,parent_ct=ngramDictObj['_c'])
 	# print(sys.getsizeof(ngramDictObj))
-	if word2id['_counter']<=100:
+	if ngramDictObj['_word2id']['_counter']<=100:
 		pprint.pprint(ngramDictObj)
-		pprint.pprint(word2id)
-		pprint.pprint(id2word)
 	else:
 		f1=open('ignoredFiles/sample-ngramDict.json',"w")
 		json.dump(ngramDictObj,f1)
 		f1.close
-
-		f2=open('ignoredFiles/sample-Word2id.json',"w")
-		json.dump(word2id,f2)
-		f2.close
-
-		f3=open('ignoredFiles/sample-Id2word.json',"w")
-		json.dump(id2word,f3)
-		f3.close
 	# while True:
 	# 	previous=input("input something to predict (type quit to exit):\n")
 	# 	naivePredict(ngramDictObj,previous)
