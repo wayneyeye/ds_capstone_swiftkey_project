@@ -122,7 +122,7 @@ def ExtractCorpus(Corpus,n):
 	ngramDictObj["_id2word"]=id2word
 	return ngramDictObj
 
-def rankingDict(ngramDictObj,print=True,max=5,parent_ct=100):
+def rankingDict(ngramDictObj,print=True,max=2,parent_ct=100):
 	# if not a leaf node
 	if ngramDictObj['_n']!={}:
 		ngramDictObj['_f']={}
