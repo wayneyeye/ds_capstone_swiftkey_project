@@ -177,7 +177,9 @@ def naivePredict(ngramDictObj,previous):
 	return
 
 def test():
-	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/sentences-sample.txt')
+	sentencePATH='/home/yewenhe0904/Developing/ds-capstone-project/sample-data/sentences-sample.txt'
+	testPATH='/home/yewenhe0904/Developing/ds-capstone-project/testing-data/twitter-testing.txt'
+	Corpus=prepareCorpus(testPATH)
 	ngramDictObj=ExtractCorpus(Corpus,3)
 	rankingDict(ngramDictObj,parent_ct=ngramDictObj['_c'])
 	# print(sys.getsizeof(ngramDictObj))
