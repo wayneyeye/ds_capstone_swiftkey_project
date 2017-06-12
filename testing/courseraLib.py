@@ -115,6 +115,9 @@ def ExtractCorpus(Corpus,n):
 		ngramExtract(tokens,n,ngramDictObj,word2id,id2word)
 		i+= 1
 		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
+	
+	if "<EOS>" in word2id["_word"]:
+		del ngramDictObj["_n"][word2id["_word"]["<EOS>"]]
 	return (ngramDictObj,word2id,id2word)
 
 def rankingDict(ngramDictObj,print=True,max=5,parent_ct=100):
