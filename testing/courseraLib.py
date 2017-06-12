@@ -104,7 +104,7 @@ def ExtractCorpus(Corpus,n):
 		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
 	return (ngramDictObj,word2id,id2word)
 
-def rankingDict(ngramDictObj,print=True,max=10,parent_ct=100):
+def rankingDict(ngramDictObj,print=True,max=5,parent_ct=100):
 	# if not a leaf node
 	if ngramDictObj['_n']!={}:
 		ngramDictObj['_f']={}
@@ -123,20 +123,22 @@ def rankingDict(ngramDictObj,print=True,max=10,parent_ct=100):
 				leafChildOnlyFlag=False
 			# load freqDict
 			ngramDictObj['_f'][w]=ngramDictObj['_n'][w]['_c']
-			prob=ngramDictObj['_n'][w]['_c']/parent_ct
-			if prob<0.0001:
-				ngramDictObj['_n'][w]['_p']=format(ngramDictObj['_n'][w]['_c']/parent_ct,'.8f')
-			elif prob < 0.1:
-				ngramDictObj['_n'][w]['_p']=format(ngramDictObj['_n'][w]['_c']/parent_ct,'.3f')
-			else:
-				ngramDictObj['_n'][w]['_p']=format(ngramDictObj['_n'][w]['_c']/parent_ct,'.0f')
+			# prob=ngramDictObj['_n'][w]['_c']/parent_ct
+			# logging.debug(prob)
+			# if prob<0.0001:
+			# 	ngramDictObj['_n'][w]['_p']=format(ngramDictObj['_n'][w]['_c']/parent_ct,'.8f')
+			# elif prob < 0.01:
+			# 	ngramDictObj['_n'][w]['_p']=format(ngramDictObj['_n'][w]['_c']/parent_ct,'.3f')
+			# else:
+			# 	ngramDictObj['_n'][w]['_p']=format(ngramDictObj['_n'][w]['_c']/parent_ct,'.1f')
+
 			# recursively call to the next level
 			rankingDict(ngramDictObj['_n'][w],print=False,parent_ct=ngramDictObj['_n'][w]['_c'])			
 			if print:
 				i+= 1
 				printProgressBar(i, l, prefix = 'Ranking Dict:', suffix = 'Complete')
 		# if the current node has more than 5 branches--->cache the most frequent child		
-		if len(ngramDictObj['_f'])>5:
+		if len(ngramDictObj['_f'])>max:
 			ngramDictObj['_r']=sorted(ngramDictObj['_f'],\
 			 	key=ngramDictObj['_f'].__getitem__,reverse=True)
 		else:
@@ -146,7 +148,7 @@ def rankingDict(ngramDictObj,print=True,max=10,parent_ct=100):
 			ngramDictObj['_r']=ngramDictObj['_r'][0:max]
 		# delete _f _c
 		del ngramDictObj['_f']
-		del ngramDictObj['_c']
+		# del ngramDictObj['_c']
 		if leafChildOnlyFlag:
 			remove=[];
 			for k in ngramDictObj['_n'].keys():
@@ -158,7 +160,7 @@ def rankingDict(ngramDictObj,print=True,max=10,parent_ct=100):
 	else:
 		# free leafnode space
 		del ngramDictObj['_n']
-		del ngramDictObj['_c']
+		# del ngramDictObj['_c']
 		# del ngramDictObj['_p']
 		
 
