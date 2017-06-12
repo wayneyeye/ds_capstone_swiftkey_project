@@ -174,8 +174,8 @@ def naivePredict(ngramDictObj,previous):
 	return
 
 def test():
-	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/testing-data/twitter-testing.txt')
-	ngramDictObj,word2id,id2word=ExtractCorpus(Corpus,4)
+	Corpus=prepareCorpus('/home/yewenhe0904/Developing/ds-capstone-project/sample-data/sentences-sample.txt')
+	ngramDictObj,word2id,id2word=ExtractCorpus(Corpus,3)
 	rankingDict(ngramDictObj,parent_ct=ngramDictObj['_c'])
 	# print(sys.getsizeof(ngramDictObj))
 	if word2id['_counter']<=100:
