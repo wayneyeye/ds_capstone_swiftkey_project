@@ -12,7 +12,10 @@ logging.basicConfig(level=LOGGING_LVL.get(sys.argv[1],'debug'),format='%(asctime
 
 #loading training files
 logging.debug(os.getcwd())
-dataFilePath=os.path.join(os.getcwd(),'training-data')
+if input('debug or run?\n')=='run':
+	dataFilePath=os.path.join(os.getcwd(),'training-data')
+else:
+	dataFilePath=os.path.join(os.getcwd(),'mini-data')
 dataFileDict={}
 for file in os.listdir(dataFilePath):
 	logging.debug(file)
@@ -35,14 +38,14 @@ if file2read.lower()=="all":
 else:
 	fileList.append(file2read)
 
-n_model=input('the n value in n-gram model?\n')
+n_model=int(input('the n value in n-gram model?\n'))
 
 for f in fileList:
 	print("Working on ",f,"...\n")
 	Corpus=co.prepareCorpus(dataFileDict[f]['path'])
 	ngramDictObj=co.ExtractCorpus(Corpus,n_model)
 	co.rankingDict(ngramDictObj,parent_ct=ngramDictObj['_c'])
-	savetopath=os.path.join(os.getcwd(),'ignoredFiles',f+'-nGramDict.json')
+	savetopath=os.path.join(os.getcwd(),'ignoredFiles','DictOutput',f+'-nGramDict.json')
 	f1=open(savetopath,"w")
 	json.dump(ngramDictObj,f1)
 	f1.close
