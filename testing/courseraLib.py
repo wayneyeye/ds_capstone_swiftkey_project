@@ -28,6 +28,12 @@ def prepareCorpus(path):
 		for s in line:
 			if s!='':
 				xS=cleanInput(s)
+				if xS==[]:
+					xS=['<Other>']
+				else:
+					xS.append("<EOS>")
+				logging.debug(xS)
+				# xS=xS.append('<Eos>')
 				Corpus.append(xS)
 			else:
 				continue
@@ -35,9 +41,11 @@ def prepareCorpus(path):
 		printProgressBar(i, l, prefix = 'Loading Corpus:', suffix = 'Complete')
 	#close file objs after use
 	fileObj.close()
+	logging.debug(Corpus)
 	return Corpus
 
 def ngramDict(ngramDictObj,word2id,id2word,token):
+	logging.debug(token)
 	word=token[0]
 	ngramDictObj['_c']+=1
 	# add new word to dictionary
@@ -48,14 +56,19 @@ def ngramDict(ngramDictObj,word2id,id2word,token):
 		id2word['_id'][wid]=word
 	else:
 		wid=word2id['_word'][word]
+
 	# add id to ngramDict
 	if wid not in ngramDictObj['_n']:
 		ngramDictObj['_n'][wid]={"_c":0,"_n":{}}
+
 	if len(token)<=1:
+		ngramDictObj['_n'][wid]["_c"]+=1
+		logging.debug('end of ngram')
 		return 
 	else:
 		subDict=ngramDictObj['_n'][wid]
-		ngramDict(subDict,word2id,id2word,token[1:])
+		token=token[1:]
+		ngramDict(subDict,word2id,id2word,token)
 
 def ngramExtract(tokens,n,ngramDictObj,word2id,id2word):
 	if len(tokens)==0:
@@ -116,22 +129,10 @@ def rankingDict(ngramDictObj,print=True,max=5,parent_ct=100):
 		# add to freqDict
 		leafChildOnlyFlag=True
 		for w in ngramDictObj['_n']:
-			#fix leaf node count
-			if ngramDictObj['_n'][w]['_n']=={}:
-				ngramDictObj['_n'][w]['_c']=1
-			else:
+			if ngramDictObj['_n'][w]['_n']!={}:
 				leafChildOnlyFlag=False
 			# load freqDict
 			ngramDictObj['_f'][w]=ngramDictObj['_n'][w]['_c']
-			# prob=ngramDictObj['_n'][w]['_c']/parent_ct
-			# logging.debug(prob)
-			# if prob<0.0001:
-			# 	ngramDictObj['_n'][w]['_p']=format(ngramDictObj['_n'][w]['_c']/parent_ct,'.8f')
-			# elif prob < 0.01:
-			# 	ngramDictObj['_n'][w]['_p']=format(ngramDictObj['_n'][w]['_c']/parent_ct,'.3f')
-			# else:
-			# 	ngramDictObj['_n'][w]['_p']=format(ngramDictObj['_n'][w]['_c']/parent_ct,'.1f')
-
 			# recursively call to the next level
 			rankingDict(ngramDictObj['_n'][w],print=False,parent_ct=ngramDictObj['_n'][w]['_c'])			
 			if print:
@@ -146,9 +147,8 @@ def rankingDict(ngramDictObj,print=True,max=5,parent_ct=100):
 		# shrink _r
 		if len(ngramDictObj['_r'])>max:
 			ngramDictObj['_r']=ngramDictObj['_r'][0:max]
-		# delete _f _c
+		# delete _f 
 		del ngramDictObj['_f']
-		# del ngramDictObj['_c']
 		if leafChildOnlyFlag:
 			remove=[];
 			for k in ngramDictObj['_n'].keys():
@@ -160,8 +160,7 @@ def rankingDict(ngramDictObj,print=True,max=5,parent_ct=100):
 	else:
 		# free leafnode space
 		del ngramDictObj['_n']
-		# del ngramDictObj['_c']
-		# del ngramDictObj['_p']
+
 		
 
 
