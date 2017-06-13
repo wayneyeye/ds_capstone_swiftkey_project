@@ -49,3 +49,4 @@ for f in fileList:
 	f1=open(savetopath,"w")
 	json.dump(ngramDictObj,f1)
 	f1.close
+	gc.collect()
