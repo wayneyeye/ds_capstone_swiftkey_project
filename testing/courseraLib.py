@@ -51,7 +51,7 @@ def ngramDict(ngramDictObj,word2id,id2word,token):
 	# add new word to dictionary
 	if word not in word2id['_word']:
 		word2id['_counter']+=1
-		wid=word2id['_counter']
+		wid='W'+str(word2id['_counter'])
 		word2id['_word'][word]=wid
 		id2word['_id'][wid]=word
 	else:
