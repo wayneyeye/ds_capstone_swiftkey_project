@@ -58,7 +58,7 @@ if __name__=="__main__":
 
 #loads data from json file
 	print("Loading from JSON file ...")
-	jsonFile=open('ignoredFiles/Large-Sample-Dict/news-nGramDict.json','r')
+	jsonFile=open(sys.argv[2],'r')
 	testDict=json.load(jsonFile)
 	freqDict={}
 	recordFreq(testDict,freqDict)
