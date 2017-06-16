@@ -101,26 +101,6 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     if iteration == total: 
         print("\n")
 
-def skimDict(ngramDictObj):
-	remove=[]
-	#progress bar print
-	i=0
-	l=len(ngramDictObj['_n'])
-	printProgressBar(i, l, prefix = 'Shrinking Dict Step 1:', suffix = 'Complete')
-	for wid in ngramDictObj['_n']:
-		if ngramDictObj['_n'][wid]['_c']==1:
-			remove.append(wid)
-		i+= 1
-		printProgressBar(i, l, prefix = 'Shrinking Dict Step 1:', suffix = 'Complete')
-	#progress bar print
-	i=0
-	l=len(remove)
-	printProgressBar(i, l, prefix = 'Shrinking Dict Step 2:', suffix = 'Complete')
-	for wid in remove:
-		del ngramDictObj['_n'][wid]
-		i+= 1
-		printProgressBar(i, l, prefix = 'Shrinking Dict Step 2:', suffix = 'Complete')
-
 def ExtractCorpus(Corpus,n):
 	# create new Dict for storage
 	ngramDictObj={'_createDate':str(datetime.datetime.now()),"_model":n,'_n':{},'_c':0}
@@ -141,6 +121,15 @@ def ExtractCorpus(Corpus,n):
 	ngramDictObj["_word2id"]=word2id
 	ngramDictObj["_id2word"]=id2word
 	return ngramDictObj
+
+def skimDict(ngramDictObj):
+	remove=[]
+	for wid in ngramDictObj['_n']:
+		if ngramDictObj['n'][wid]['_c']==1:
+			remove.append(wid)
+	for wid in remove:
+		del ngramDictObj['n'][wid]
+
 
 def rankingDict(ngramDictObj,print=True,max=5,parent_ct=100):
 	# if not a leaf node
