@@ -39,6 +39,7 @@ else:
 	fileList.append(file2read)
 
 n_model=int(input('the n value in n-gram model?\n'))
+r_max=int(input('output_length?(put a number)\n'))
 skim=input('skim?(y/n)\n').lower()
 
 for f in fileList:
@@ -47,7 +48,7 @@ for f in fileList:
 	ngramDictObj=co.ExtractCorpus(Corpus,n_model)
 	if skim=='y':
 		co.skimDict(ngramDictObj)
-	co.rankingDict(ngramDictObj,parent_ct=ngramDictObj['_c'])
+	co.rankingDict(ngramDictObj,parent_ct=ngramDictObj['_c'],max=r_max)
 	savetopath=os.path.join(os.getcwd(),'ignoredFiles','DictOutput',f+'-nGramDict.json')
 	f1=open(savetopath,"w")
 	json.dump(ngramDictObj,f1)
