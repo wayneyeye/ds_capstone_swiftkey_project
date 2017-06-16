@@ -101,6 +101,44 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     if iteration == total: 
         print("\n")
 
+def skimDict(ngramDictObj,print=True,mm=1):
+	remove=[]
+	#progress bar print
+	if print:
+		i=0
+		l=len(ngramDictObj['_n'])
+		printProgressBar(i, l, prefix = 'Shrinking Dict Step 1:', suffix = 'Complete')
+	if '_n' not in ngramDictObj:
+		return
+	for wid in ngramDictObj['_n']:
+		if ngramDictObj['_n'][wid]['_c']<=mm:
+			remove.append(wid)
+		if print:
+			i+= 1
+			printProgressBar(i, l, prefix = 'Shrinking Dict Step 1:', suffix = 'Complete')
+		skimDict(ngramDictObj['_n'][wid],print=False)
+	#progress bar print
+	if print:
+		i=0
+		l=len(remove)
+		printProgressBar(i, l, prefix = 'Shrinking Dict Step 2:', suffix = 'Complete')
+	for wid in remove:
+		del ngramDictObj['_n'][wid]
+		if print:
+			i+= 1
+			printProgressBar(i, l, prefix = 'Shrinking Dict Step 2:', suffix = 'Complete')
+
+def skimVacantDict(ngramDictObj):
+	if '_n' in ngramDictObj:
+		remove_w=[]
+		for wid in ngramDictObj['_n']:
+			if len(ngramDictObj['_n'][wid])==0:
+				remove_w.append(wid)
+			skimVacantDict(ngramDictObj['_n'][wid])
+		for wid in remove_w:
+			del ngramDictObj['_n'][wid]
+	
+
 def ExtractCorpus(Corpus,n):
 	# create new Dict for storage
 	ngramDictObj={'_createDate':str(datetime.datetime.now()),"_model":n,'_n':{},'_c':0}
@@ -122,7 +160,7 @@ def ExtractCorpus(Corpus,n):
 	ngramDictObj["_id2word"]=id2word
 	return ngramDictObj
 
-def rankingDict(ngramDictObj,print=True,max=2,parent_ct=100):
+def rankingDict(ngramDictObj,print=True,max=5,parent_ct=100):
 	# if not a leaf node
 	if ngramDictObj['_n']!={}:
 		ngramDictObj['_f']={}
@@ -143,7 +181,7 @@ def rankingDict(ngramDictObj,print=True,max=2,parent_ct=100):
 			if print:
 				i+= 1
 				printProgressBar(i, l, prefix = 'Ranking Dict:', suffix = 'Complete')
-		# if the current node has more than 5 branches--->cache the most frequent child		
+		# if the current node has more than max branches--->cache the most frequent child		
 		if len(ngramDictObj['_f'])>max:
 			ngramDictObj['_r']=sorted(ngramDictObj['_f'],\
 			 	key=ngramDictObj['_f'].__getitem__,reverse=True)
@@ -154,17 +192,19 @@ def rankingDict(ngramDictObj,print=True,max=2,parent_ct=100):
 			ngramDictObj['_r']=ngramDictObj['_r'][0:max]
 		# delete _f 
 		del ngramDictObj['_f']
+		del ngramDictObj['_c']
 		if leafChildOnlyFlag:
-			remove=[];
-			for k in ngramDictObj['_n'].keys():
-				if k not in ngramDictObj['_r']:
-					remove.append(k)
-			for k in remove:
-				del ngramDictObj['_n'][k]
+			# remove=[];
+			# for k in ngramDictObj['_n'].keys():
+			# 		remove.append(k)
+			# for k in remove:
+			# 	del ngramDictObj['_n'][k]
+			del ngramDictObj['_n']
 	# if a leaf node
 	else:
 		# free leafnode space
 		del ngramDictObj['_n']
+		del ngramDictObj['_c']
 
 def naivePredict(ngramDictObj,previous):
 	previous_list=previous.lower().split(' ')
