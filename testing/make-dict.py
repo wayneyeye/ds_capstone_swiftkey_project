@@ -49,6 +49,7 @@ for f in fileList:
 	if skim=='y':
 		co.skimDict(ngramDictObj)
 	co.rankingDict(ngramDictObj,parent_ct=ngramDictObj['_c'],max=r_max)
+	co.skimVacantDict(ngramDictObj)
 	savetopath=os.path.join(os.getcwd(),'ignoredFiles','DictOutput',f+'-nGramDict.json')
 	f1=open(savetopath,"w")
 	json.dump(ngramDictObj,f1)

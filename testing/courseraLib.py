@@ -101,25 +101,43 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     if iteration == total: 
         print("\n")
 
-def skimDict(ngramDictObj):
+def skimDict(ngramDictObj,print=True,mm=1):
 	remove=[]
 	#progress bar print
-	i=0
-	l=len(ngramDictObj['_n'])
-	printProgressBar(i, l, prefix = 'Shrinking Dict Step 1:', suffix = 'Complete')
-	for wid in ngramDictObj['_n']:
-		if ngramDictObj['_n'][wid]['_c']==1:
-			remove.append(wid)
-		i+= 1
+	if print:
+		i=0
+		l=len(ngramDictObj['_n'])
 		printProgressBar(i, l, prefix = 'Shrinking Dict Step 1:', suffix = 'Complete')
+	if '_n' not in ngramDictObj:
+		return
+	for wid in ngramDictObj['_n']:
+		if ngramDictObj['_n'][wid]['_c']<=mm:
+			remove.append(wid)
+		if print:
+			i+= 1
+			printProgressBar(i, l, prefix = 'Shrinking Dict Step 1:', suffix = 'Complete')
+		skimDict(ngramDictObj['_n'][wid],print=False)
 	#progress bar print
-	i=0
-	l=len(remove)
-	printProgressBar(i, l, prefix = 'Shrinking Dict Step 2:', suffix = 'Complete')
+	if print:
+		i=0
+		l=len(remove)
+		printProgressBar(i, l, prefix = 'Shrinking Dict Step 2:', suffix = 'Complete')
 	for wid in remove:
 		del ngramDictObj['_n'][wid]
-		i+= 1
-		printProgressBar(i, l, prefix = 'Shrinking Dict Step 2:', suffix = 'Complete')
+		if print:
+			i+= 1
+			printProgressBar(i, l, prefix = 'Shrinking Dict Step 2:', suffix = 'Complete')
+
+def skimVacantDict(ngramDictObj):
+	if '_n' in ngramDictObj:
+		remove_w=[]
+		for wid in ngramDictObj['_n']:
+			if len(ngramDictObj['_n'][wid])==0:
+				remove_w.append(wid)
+			skimVacantDict(ngramDictObj['_n'][wid])
+		for wid in remove_w:
+			del ngramDictObj['_n'][wid]
+	
 
 def ExtractCorpus(Corpus,n):
 	# create new Dict for storage
