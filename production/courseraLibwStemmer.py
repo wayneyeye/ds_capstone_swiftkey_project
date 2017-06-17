@@ -72,10 +72,6 @@ def ngramDict(ngramDictObj,word2id,id2word,word2stem,token):
 	logging.debug(token)
 	word=token[0]
 	ngramDictObj['_c']+=1
-	# add new word to dictionary
-	if word not in word2stem['_stem']:
-		word2stem['_stem'][word]=Lst.stem(word)
-	word=word2stem['_stem'][word]
 	if word not in word2id['_word']:
 		word2id['_counter']+=1
 		wid='W'+str(word2id['_counter'])
@@ -100,7 +96,12 @@ def ngramDict(ngramDictObj,word2id,id2word,word2stem,token):
 def ngramExtract(tokens,n,ngramDictObj,word2id,id2word,word2stem):
 	if len(tokens)==0:
 		return
+	else:
+		if tokens[0] not in word2stem['_stem']:
+			word2stem['_stem'][tokens[0]]=Lst.stem(tokens[0])
+		tokens[0]=word2stem['_stem'][tokens[0]]
 	if len(tokens)<n:
+		# add new word to dictionary
 		ngramDict(ngramDictObj,word2id,id2word,word2stem,tokens)
 		if len(tokens)>1:
 			ngramExtract(tokens[1:],n,ngramDictObj,word2id,id2word,word2stem)
