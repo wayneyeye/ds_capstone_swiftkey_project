@@ -41,6 +41,7 @@ else:
 n_model=int(input('the n value in n-gram model?\n'))
 r_max=int(input('output_length?(put a number)\n'))
 skim=input('skim?(y/n)\n').lower()
+skim_ct=int(input('skim threshold?(put a number)\n'))
 
 for f in fileList:
 	print("Working on ",f,"...\n")
@@ -49,7 +50,7 @@ for f in fileList:
 	if skim=='y':
 		co.skimDict(ngramDictObj)
 	co.rankingDict(ngramDictObj,parent_ct=ngramDictObj['_c'],max=r_max)
-	co.skimVacantDict(ngramDictObj)
+	co.skimVacantDict(ngramDictObj,mm=skim_ct)
 	savetopath=os.path.join(os.getcwd(),'ignoredFiles','DictOutput',f+'-nGramDict.json')
 	f1=open(savetopath,"w")
 	json.dump(ngramDictObj,f1)
