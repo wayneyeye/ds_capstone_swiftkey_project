@@ -9,7 +9,7 @@ def cleanInput(input):
 	for item in input:
 		# logging.debug(item)
 		item = item.strip(string.punctuation)
-		item = re.sub(r"^.*\d+.*$","<Quantity>",item)
+		item = re.sub(r"^.*\d+.*$","<quantity>",item)
 		if len(item)>1 or (item=='a' or item=='i'):
 			cleanInput.append(item)
 	return cleanInput
@@ -29,11 +29,11 @@ def prepareCorpus(path):
 			if s!='':
 				xS=cleanInput(s)
 				if xS==[]:
-					xS=['<Other>']
+					xS=['<other>']
 				else:
-					xS.append("<EOS>")
+					xS.append("<eos>")
 				logging.debug(xS)
-				# xS=xS.append('<Eos>')
+				# xS=xS.append('<eos>')
 				Corpus.append(xS)
 			else:
 				continue
@@ -154,8 +154,8 @@ def ExtractCorpus(Corpus,n):
 		i+= 1
 		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
 	
-	if "<EOS>" in word2id["_word"]:
-		del ngramDictObj["_n"][word2id["_word"]["<EOS>"]]
+	if "<eos>" in word2id["_word"]:
+		del ngramDictObj["_n"][word2id["_word"]["<eos>"]]
 	ngramDictObj["_word2id"]=word2id
 	ngramDictObj["_id2word"]=id2word
 	return ngramDictObj
