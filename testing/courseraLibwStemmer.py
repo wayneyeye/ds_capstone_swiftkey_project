@@ -11,7 +11,7 @@ def cleanInput(input):
 	for item in input:
 		# logging.debug(item)
 		item = item.strip(string.punctuation)
-		item = re.sub(r"^.*\d+.*$","<Quantity>",item)
+		item = re.sub(r"^.*\d+.*$","<quantity>",item)
 		if len(item)>1 or (item=='a' or item=='i'):
 			cleanInput.append(item)
 	return cleanInput
@@ -31,11 +31,11 @@ def prepareCorpus(path):
 			if s!='':
 				xS=cleanInput(s)
 				if xS==[]:
-					xS=['<Other>']
+					xS=['<other>']
 				else:
-					xS.append("<EOS>")
+					xS.append("<eos>")
 				logging.debug(xS)
-				# xS=xS.append('<Eos>')
+				# xS=xS.append('<eos>')
 				Corpus.append(xS)
 			else:
 				continue
@@ -146,6 +146,7 @@ def ExtractCorpus(Corpus,n):
 	ngramDictObj={'_createDate':str(datetime.datetime.now()),"_model":n,'_n':{},'_c':0}
 	word2id={'_word':{},'_counter':0}
 	id2word={'_id':{}}
+	word2stem={'_stem':{}}
 	#progress bar print
 	i=0
 	l=len(Corpus)
@@ -156,10 +157,11 @@ def ExtractCorpus(Corpus,n):
 		i+= 1
 		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
 	
-	if "<EOS>" in word2id["_word"]:
-		del ngramDictObj["_n"][word2id["_word"]["<EOS>"]]
+	if "<eos>" in word2id["_word"]:
+		del ngramDictObj["_n"][word2id["_word"]["<eos>"]]
 	ngramDictObj["_word2id"]=word2id
 	ngramDictObj["_id2word"]=id2word
+	ngramDictObj["_word2stem"]=id2word
 	return ngramDictObj
 
 def rankingDict(ngramDictObj,print=True,max=5,parent_ct=100):
@@ -207,16 +209,6 @@ def rankingDict(ngramDictObj,print=True,max=5,parent_ct=100):
 		# free leafnode space
 		del ngramDictObj['_n']
 		del ngramDictObj['_c']
-
-def naivePredict(ngramDictObj,previous):
-	previous_list=previous.lower().split(' ')
-	print(previous_list)
-	try:
-		print(ngramDictObj['_n'][previous_list[0]]['_n'][previous_list[1]]\
-			['_n'][previous_list[2]]['_n'][previous_list[3]]['_r'])
-	except:
-		print("Not Exists!")
-	return
 
 def test():
 	sentencePATH='/home/yewenhe0904/Developing/ds-capstone-project/sample-data/sentences-sample.txt'
