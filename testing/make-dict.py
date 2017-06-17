@@ -48,9 +48,9 @@ for f in fileList:
 	Corpus=co.prepareCorpus(dataFileDict[f]['path'])
 	ngramDictObj=co.ExtractCorpus(Corpus,n_model)
 	if skim=='y':
-		co.skimDict(ngramDictObj)
+		co.skimDict(ngramDictObj,mm=skim_ct)
 	co.rankingDict(ngramDictObj,parent_ct=ngramDictObj['_c'],max=r_max)
-	co.skimVacantDict(ngramDictObj,mm=skim_ct)
+	co.skimVacantDict(ngramDictObj)
 	savetopath=os.path.join(os.getcwd(),'ignoredFiles','DictOutput',f+'-nGramDict.json')
 	f1=open(savetopath,"w")
 	json.dump(ngramDictObj,f1)
