@@ -27,6 +27,7 @@ logging.debug(dataFileDict)
 
 # open desired text file
 file2read=input("which file to read?\n type all to generate all\n"+" ".join(dataFileDict.keys())+"\n")
+sampleCutoff=int(input("sample rate (n/100) put a number between 1-99"))
 fileList=[]
 if file2read.lower()=="all":
 	fileList=list(dataFileDict.keys())
@@ -52,7 +53,6 @@ for f in fileList:
 	testingSet=open(sampleFilePath_testing,"a")
 
 	# 8 of 10 go to training 2 go to testing
-	sampleCutoff=50
 	# Initial call to print 0% progress
 	i = 0
 	l = len(list(open(dataFileDict[f]["path"])))
