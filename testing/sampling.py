@@ -52,7 +52,7 @@ for f in fileList:
 	testingSet=open(sampleFilePath_testing,"a")
 
 	# 8 of 10 go to training 2 go to testing
-	sampleCutoff=15
+	sampleCutoff=50
 	# Initial call to print 0% progress
 	i = 0
 	l = len(list(open(dataFileDict[f]["path"])))
