@@ -1,6 +1,28 @@
 import sys,os,logging,re,pprint,string,datetime,gc,json
 #import stemmer lib
 import nltk
+
+
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 30, fill = '█'):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = '\r')
+    # Print New Line on Complete
+    if iteration == total: 
+        print("\n")
+
 def cleanInput(input):
 	input=re.sub('\n+'," ",input).lower()
 	input=bytes(input,"UTF-8")
@@ -46,11 +68,14 @@ def prepareCorpus(path):
 	logging.debug(Corpus)
 	return Corpus
 
-def ngramDict(ngramDictObj,word2id,id2word,token):
+def ngramDict(ngramDictObj,word2id,id2word,word2stem,token):
 	logging.debug(token)
 	word=token[0]
 	ngramDictObj['_c']+=1
 	# add new word to dictionary
+	if word not in word2stem['_stem']:
+		word2stem['_stem'][word]=Lst.stem(word)
+	word=word2stem['_stem'][word]
 	if word not in word2id['_word']:
 		word2id['_counter']+=1
 		wid='W'+str(word2id['_counter'])
@@ -70,38 +95,19 @@ def ngramDict(ngramDictObj,word2id,id2word,token):
 	else:
 		subDict=ngramDictObj['_n'][wid]
 		token=token[1:]
-		ngramDict(subDict,word2id,id2word,token)
+		ngramDict(subDict,word2id,id2word,word2stem,token)
 
-def ngramExtract(tokens,n,ngramDictObj,word2id,id2word):
+def ngramExtract(tokens,n,ngramDictObj,word2id,id2word,word2stem):
 	if len(tokens)==0:
 		return
 	if len(tokens)<n:
-		ngramDict(ngramDictObj,word2id,id2word,tokens)
+		ngramDict(ngramDictObj,word2id,id2word,word2stem,tokens)
 		if len(tokens)>1:
-			ngramExtract(tokens[1:],n,ngramDictObj,word2id,id2word)
+			ngramExtract(tokens[1:],n,ngramDictObj,word2id,id2word,word2stem)
 	else:
-		ngramDict(ngramDictObj,word2id,id2word,tokens[0:n])
-		ngramExtract(tokens[1:],n,ngramDictObj,word2id,id2word)
+		ngramDict(ngramDictObj,word2id,id2word,word2stem,tokens[0:n])
+		ngramExtract(tokens[1:],n,ngramDictObj,word2id,id2word,word2stem)
 
-def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 30, fill = '█'):
-    """
-    Call in a loop to create terminal progress bar
-    @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-    """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = '\r')
-    # Print New Line on Complete
-    if iteration == total: 
-        print("\n")
 
 def skimDict(ngramDictObj,print=True,mm=1):
 	remove=[]
@@ -142,6 +148,10 @@ def skimVacantDict(ngramDictObj):
 	
 
 def ExtractCorpus(Corpus,n):
+	#init lancaster stemmer:
+	from nltk.stem.lancaster import LancasterStemmer
+	global Lst 
+	Lst = LancasterStemmer()
 	# create new Dict for storage
 	ngramDictObj={'_createDate':str(datetime.datetime.now()),"_model":n,'_n':{},'_c':0}
 	word2id={'_word':{},'_counter':0}
@@ -153,7 +163,7 @@ def ExtractCorpus(Corpus,n):
 	printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
 	#iterate thru corpus
 	for tokens in Corpus:
-		ngramExtract(tokens,n,ngramDictObj,word2id,id2word)
+		ngramExtract(tokens,n,ngramDictObj,word2id,id2word,word2stem)
 		i+= 1
 		printProgressBar(i, l, prefix = 'Generating Dict:', suffix = 'Complete')
 	
@@ -161,7 +171,7 @@ def ExtractCorpus(Corpus,n):
 		del ngramDictObj["_n"][word2id["_word"]["<eos>"]]
 	ngramDictObj["_word2id"]=word2id
 	ngramDictObj["_id2word"]=id2word
-	ngramDictObj["_word2stem"]=id2word
+	ngramDictObj["_word2stem"]=word2stem
 	return ngramDictObj
 
 def rankingDict(ngramDictObj,print=True,max=5,parent_ct=100):
