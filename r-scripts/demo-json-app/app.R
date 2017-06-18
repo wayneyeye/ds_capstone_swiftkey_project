@@ -12,16 +12,19 @@ library(shiny)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-  textInput("caption", "Input Text", "What a wonderful"),
+  titlePanel("N-Gram Predicting App"),
+  selectInput(inputId="corpus", label="Which corpus to use?", choices=list("mixed","news","tweets")),
+  textInput("text", "Input Text", "Have an awesome"),
   verbatimTextOutput("value")
 )
 server <- function(input, output) {
   library(jsonlite)
-  nGramDict<-read_json('data/mixed-nGramDict_skim_10.json')
-  
+  nGramDict_mixed<-read_json('data/mixed-nGramDict.json')
+  nGramDict_news<-read_json('data/news-nGramDict.json')
+  nGramDict_twitter<-read_json('data/twitter-nGramDict.json')
+  #helper functions
   trim <- function (x) gsub("^\\s+|\\s+$", "", x)
   trimPunctuations <- function (x) gsub("^[[:punct:]]+|[[:punct:]]+$", "", x)
-  
   cleanInputPredict <- function(test_input){
     cleanedInput<-list()
     test_input_t<-test_input
@@ -35,7 +38,6 @@ server <- function(input, output) {
     }
     return(cleanedInput)
   }
-
   predictCore<-function(input_tokens,out_len=5){
     input_tokens_o<-input_tokens
     if (length(input_tokens)<1){
@@ -103,8 +105,17 @@ server <- function(input, output) {
       }
     }
   }
-  
-  predictNgram<-function(test_input,out_len=5){
+  #main funcion
+  predictNgram<-function(corpus,test_input,out_len=5){
+    if(corpus=="mixed"){
+      nGramDict<<-nGramDict_mixed
+    }
+    else if(corpus=="news"){
+      nGramDict<<-nGramDict_news
+    }
+    else if(corpus=="tweets"){
+      nGramDict<<-nGramDict_twitter
+    }
     input_tokens<-cleanInputPredict(test_input)
     if (length(input_tokens)>nGramDict[['_model']]){
       input_tokens=input_tokens[(length(input_tokens)-nGramDict[['_model']]+1):length(input_tokens)]
@@ -118,14 +129,14 @@ server <- function(input, output) {
     }
     eosflag<-TRUE
     for (word in output_wlist){
-      if (word=='<eos>'){
+      if (tolower(word)=='<eos>'){
         if (eosflag){
           output<-append(output,',')
           output<-append(output,'.')
         }
         eosflag<-FALSE
       }
-      else if(word=="<quantity>"){
+      else if(tolower(word)=="<quantity>"){
         next
       }
       else{
@@ -149,8 +160,8 @@ server <- function(input, output) {
     }
     return(out_str)
   }
-
-  output$value <- renderText({ predictNgram(input$caption,out_len=10) })
+  
+  output$value <- renderText({ predictNgram(input$corpus,input$text,out_len=10) })
   
   #output$value <- renderText({ input$caption })
 }
