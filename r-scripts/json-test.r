@@ -130,7 +130,7 @@ predictNgram<-function(test_input,out_len=5){
     if (length(output)>1){
       for (i in 2:(length(output))){
         if (!(output[i] %in% output[1:(i-1)])){
-          output_dp<-append(output_dp,output[i])
+          output_dp<-append(output_dp,output[[i]])
         }
       }
     }
@@ -138,7 +138,11 @@ predictNgram<-function(test_input,out_len=5){
       output_dp=output_dp[1:out_len]
     }
   }
-  return(output_dp)
+  out_str=""
+  for (l in output_dp){
+    out_str<-paste(out_str," ",l[[1]])
+  }
+  return(out_str)
 }
 
 predictNgram('such a wonderful',out_len=10)
