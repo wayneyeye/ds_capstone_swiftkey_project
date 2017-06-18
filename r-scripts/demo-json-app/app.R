@@ -17,7 +17,7 @@ ui <- fluidPage(
 )
 server <- function(input, output) {
   library(jsonlite)
-  nGramDict<-read_json('data/mixed-nGramDict_10_1.json')
+  nGramDict<-read_json('data/mixed-nGramDict_skim_10.json')
   
   trim <- function (x) gsub("^\\s+|\\s+$", "", x)
   trimPunctuations <- function (x) gsub("^[[:punct:]]+|[[:punct:]]+$", "", x)
